@@ -1,0 +1,940 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Наталья мебель — мебель для вашего дома</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root {
+  --bg:#f7f4ef;
+  --paper:#fff;
+  --text:#292823;
+  --muted:#817d74;
+  --accent:#927b60;
+  --line:#e9e3da;
+  --dark:#292923;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--bg);color:var(--text);
+  font-family:Arial,Helvetica,sans-serif;
+}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+a{color:inherit;text-decoration:none}
+.container{width:min(1180px,92%);margin:auto}
+header{
+  background:#fff;border-bottom:1px solid var(--line);
+  position:sticky;top:0;z-index:10;
+}
+.header-inner{
+  min-height:76px;display:flex;align-items:center;
+  justify-content:space-between;gap:15px;
+}
+.logo{font-family:Georgia,serif;font-size:25px;letter-spacing:1px}
+.logo small{display:block;font:10px Arial;letter-spacing:3px;color:var(--muted);margin-top:4px}
+nav{display:flex;gap:24px;align-items:center;font-size:14px}
+nav a:hover{color:var(--accent)}
+.btn{
+  border:0;background:var(--dark);color:white;
+  padding:13px 19px;border-radius:3px;
+}
+.btn:hover{opacity:.88}
+.btn-light{background:#eee9e1;color:var(--text)}
+.btn-outline{background:transparent;color:var(--text);border:1px solid var(--line)}
+.hero{
+  min-height:390px;display:flex;align-items:center;
+  background:linear-gradient(100deg,#e9e2d7,#f5f1eb);
+  padding:65px 0;
+}
+.hero-content{max-width:620px}
+.eyebrow{font-size:11px;letter-spacing:3px;color:var(--accent);text-transform:uppercase}
+h1{font:clamp(38px,6vw,64px) Georgia,serif;line-height:1.08;margin:18px 0}
+.hero p{color:#69665e;line-height:1.7;max-width:490px}
+.section{padding:65px 0}
+.section-head{display:flex;align-items:end;justify-content:space-between;gap:15px;margin-bottom:25px}
+h2{font:34px Georgia,serif;margin:0}
+.muted{color:var(--muted)}
+.categories{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:25px}
+.category-btn{
+  padding:10px 17px;background:white;border:1px solid var(--line);
+  border-radius:30px;color:var(--text)
+}
+.category-btn.active{background:var(--dark);color:white;border-color:var(--dark)}
+.search{width:100%;max-width:320px;padding:12px;border:1px solid var(--line);background:white}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
+.product{
+  background:white;border:1px solid var(--line);overflow:hidden;
+}
+.product img{width:100%;height:245px;object-fit:cover;background:#eee9e1;display:block}
+.product-body{padding:18px}
+.product-category{font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:1px}
+.product h3{font:23px Georgia,serif;margin:9px 0}
+.product p{font-size:13px;line-height:1.6;color:var(--muted);min-height:38px}
+.price{font-weight:bold;font-size:18px;margin:14px 0}
+.product-actions{display:flex;gap:8px}
+.product-actions button{flex:1}
+.empty{
+  text-align:center;padding:55px 15px;background:white;
+  border:1px solid var(--line);color:var(--muted)
+}
+.about{background:#eee9e1}
+.about p{max-width:700px;line-height:1.8;color:#68645d}
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:30px}
+.contact-card{background:white;padding:25px;border:1px solid var(--line)}
+footer{background:var(--dark);color:white;padding:30px 0}
+footer .muted{color:#c4bfb6}
+.modal{
+  display:none;position:fixed;inset:0;background:#0009;
+  z-index:30;align-items:center;justify-content:center;padding:15px;
+}
+.modal.open{display:flex}
+.modal-box{
+  background:white;width:min(520px,100%);max-height:90vh;
+  overflow:auto;padding:25px;border-radius:5px;
+}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.modal-head h2{font-size:27px}
+.close{border:0;background:none;font-size:26px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:13px;margin-bottom:7px}
+.field input,.field textarea,.field select{
+  width:100%;padding:12px;border:1px solid var(--line);background:white;
+}
+.field textarea{min-height:90px;resize:vertical}
+.full{width:100%}
+.admin-wrap{padding:35px 0}
+.admin-panel{background:white;padding:22px;border:1px solid var(--line);margin-bottom:20px}
+.admin-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:20px 0}
+.admin-tabs button{padding:10px 14px;border:1px solid var(--line);background:white}
+.admin-tabs button.active{background:var(--dark);color:white}
+.admin-list{display:grid;gap:10px}
+.admin-item{
+  border:1px solid var(--line);padding:13px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+}
+.admin-item img{width:65px;height:55px;object-fit:cover}
+.admin-item-info{flex:1;min-width:0}
+.admin-item-info strong{display:block}
+.admin-item-info small{color:var(--muted)}
+.admin-actions{display:flex;gap:7px;flex-wrap:wrap}
+.admin-actions button{padding:8px 10px;font-size:12px}
+.notice{padding:12px;background:#f1eee8;margin:12px 0;font-size:13px;line-height:1.5}
+.status{font-size:12px;color:var(--accent)}
+.hidden{display:none!important}
+@media(max-width:800px){
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  nav{gap:12px;font-size:12px}
+  .hero{min-height:330px}
+}
+@media(max-width:560px){
+  .header-inner{flex-wrap:wrap;padding:13px 0}
+  nav{width:100%;justify-content:space-between}
+  .logo{font-size:22px}
+  .grid{grid-template-columns:1fr}
+  .product img{height:250px}
+  .section{padding:45px 0}
+  .section-head{align-items:start;flex-direction:column}
+  .contact-grid{grid-template-columns:1fr}
+  .admin-item{align-items:flex-start;flex-wrap:wrap}
+  .admin-actions{width:100%}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="container header-inner">
+    <a class="logo" href="#">
+      НАТАЛЬЯ МЕБЕЛЬ
+      <small>МЕБЕЛЬ ДЛЯ ВАШЕГО ДОМА</small>
+    </a>
+    <nav>
+      <a href="#catalog">Каталог</a>
+      <a href="#about">О магазине</a>
+      <a href="#contacts">Контакты</a>
+      <button class="btn btn-light" onclick="openLogin()">Вход</button>
+    </nav>
+  </div>
+</header>
+
+<main id="publicSite">
+  <section class="hero">
+    <div class="container hero-content">
+      <div class="eyebrow">Комфорт начинается дома</div>
+      <h1>Мебель, в которой живёт уют</h1>
+      <p>Подберите мебель для своего дома. Ознакомьтесь с нашим каталогом и оставьте заявку на понравившуюся модель.</p>
+      <a href="#catalog" class="btn">Смотреть каталог</a>
+    </div>
+  </section>
+
+  <section class="section container" id="catalog">
+    <div class="section-head">
+      <div>
+        <div class="eyebrow">Наш ассортимент</div>
+        <h2>Каталог мебели</h2>
+      </div>
+      <input class="search" id="searchInput" placeholder="Поиск мебели..." oninput="renderProducts()">
+    </div>
+    <div class="categories" id="categoryList">
+      <button class="category-btn active" onclick="selectCategory('all',this)">Всё</button>
+    </div>
+    <div class="grid" id="productList"></div>
+    <div class="notice hidden" id="catalogNotice"></div>
+  </section>
+
+  <section class="section about" id="about">
+    <div class="container">
+      <div class="eyebrow">Немного о нас</div>
+      <h2>Наталья мебель</h2>
+      <p>Мы помогаем создавать уютное пространство для жизни. Выбирайте мебель в каталоге и отправляйте заявку, чтобы уточнить подробности и условия покупки.</p>
+    </div>
+  </section>
+
+  <section class="section container" id="contacts">
+    <div class="eyebrow">Будем рады помочь</div>
+    <h2>Свяжитесь с нами</h2>
+    <div class="contact-grid" style="margin-top:25px">
+      <div class="contact-card">
+        <h3>Есть вопросы?</h3>
+        <p class="muted">Оставьте заявку на интересующий товар. Мы сможем связаться с вами по указанному телефону.</p>
+        <button class="btn" onclick="openInquiry()">Оставить заявку</button>
+      </div>
+      <div class="contact-card">
+        <h3>Каталог магазина</h3>
+        <p class="muted">Актуальные товары и категории загружаются из базы магазина.</p>
+        <a class="btn btn-light" href="#catalog">Перейти в каталог</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<section class="admin-wrap container hidden" id="adminSite">
+  <div class="section-head">
+    <div>
+      <div class="eyebrow">Управление магазином</div>
+      <h2>Панель администратора</h2>
+    </div>
+    <button class="btn btn-outline" onclick="logout()">Выйти</button>
+  </div>
+
+  <div class="admin-panel">
+    <div id="adminWelcome" class="muted">Вы вошли в панель управления.</div>
+    <div class="admin-tabs">
+      <button class="active" onclick="showAdminTab('products',this)">Товары</button>
+      <button onclick="showAdminTab('categories',this)">Категории</button>
+      <button onclick="showAdminTab('inquiries',this)">Заявки</button>
+    </div>
+
+    <div id="adminProducts">
+      <h3>Товары</h3>
+      <button class="btn" onclick="openProductEditor()">+ Добавить товар</button>
+      <div class="admin-list" id="adminProductList" style="margin-top:18px"></div>
+    </div>
+
+    <div id="adminCategories" class="hidden">
+      <h3>Категории</h3>
+      <form onsubmit="addCategory(event)">
+        <div class="field">
+          <label>Название категории</label>
+          <input id="newCategoryName" required maxlength="80" placeholder="Например, Диваны">
+        </div>
+        <button class="btn">Добавить категорию</button>
+      </form>
+      <div class="admin-list" id="adminCategoryList" style="margin-top:18px"></div>
+    </div>
+
+    <div id="adminInquiries" class="hidden">
+      <h3>Заявки покупателей</h3>
+      <div class="admin-list" id="adminInquiryList"></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="logo">НАТАЛЬЯ МЕБЕЛЬ</div>
+    <p class="muted">Мебель для вашего дома</p>
+    <p class="muted">© <span id="year"></span> Наталья мебель</p>
+  </div>
+</footer>
+
+<!-- Окно входа -->
+<div class="modal" id="loginModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h2>Вход администратора</h2>
+      <button class="close" onclick="closeModal('loginModal')">×</button>
+    </div>
+    <form onsubmit="login(event)">
+      <div class="field">
+        <label>Email</label>
+        <input id="loginEmail" type="email" required autocomplete="username">
+      </div>
+      <div class="field">
+        <label>Пароль</label>
+        <input id="loginPassword" type="password" required autocomplete="current-password">
+      </div>
+      <div id="loginError" class="notice hidden"></div>
+      <button class="btn full">Войти</button>
+    </form>
+  </div>
+</div>
+
+<!-- Окно заявки -->
+<div class="modal" id="inquiryModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h2>Оставить заявку</h2>
+      <button class="close" onclick="closeModal('inquiryModal')">×</button>
+    </div>
+    <form onsubmit="submitInquiry(event)">
+      <div class="field">
+        <label>Ваше имя</label>
+        <input id="customerName" required maxlength="100">
+      </div>
+      <div class="field">
+        <label>Телефон для связи</label>
+        <input id="customerPhone" required maxlength="30" placeholder="+7...">
+      </div>
+      <div class="field">
+        <label>Товар</label>
+        <select id="inquiryProduct">
+          <option value="">Общий вопрос</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Комментарий</label>
+        <textarea id="inquiryMessage" maxlength="1000" placeholder="Ваш вопрос или пожелания"></textarea>
+      </div>
+      <div id="inquiryError" class="notice hidden"></div>
+      <button class="btn full" id="inquirySubmit">Отправить заявку</button>
+    </form>
+  </div>
+</div>
+
+<!-- Окно товара -->
+<div class="modal" id="productModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h2 id="productEditorTitle">Новый товар</h2>
+      <button class="close" onclick="closeModal('productModal')">×</button>
+    </div>
+    <form onsubmit="saveProduct(event)">
+      <input type="hidden" id="editProductId">
+      <div class="field">
+        <label>Название товара</label>
+        <input id="productName" required maxlength="150">
+      </div>
+      <div class="field">
+        <label>Категория</label>
+        <select id="productCategory" required></select>
+      </div>
+      <div class="field">
+        <label>Цена (руб.)</label>
+        <input id="productPrice" type="number" min="0" step="0.01" required>
+      </div>
+      <div class="field">
+        <label>Описание</label>
+        <textarea id="productDescription" maxlength="2000"></textarea>
+      </div>
+      <div class="field">
+        <label>Фотография товара</label>
+        <input id="productPhoto" type="file" accept="image/*">
+        <small class="muted">Можно выбрать одну фотографию. При редактировании без нового файла прежнее фото сохранится.</small>
+      </div>
+      <div id="productError" class="notice hidden"></div>
+      <button class="btn full" id="productSaveButton">Сохранить товар</button>
+    </form>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://jgcczftyyignibytroru.supabase.co";
+const SUPABASE_KEY = "sb_publishable_nExsA0c0D_K0gBqP-9vR2A_aGWphRTq";
+const STORAGE_BUCKET = "product-images";
+
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let categories = [];
+let products = [];
+let images = [];
+let selectedCategory = "all";
+let isAdmin = false;
+let currentUser = null;
+
+const $ = id => document.getElementById(id);
+
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, c => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  })[c]);
+}
+
+function money(value) {
+  return new Intl.NumberFormat("ru-RU").format(Number(value) || 0) + " ₽";
+}
+
+function showError(id, message) {
+  const el = $(id);
+  el.textContent = message;
+  el.classList.remove("hidden");
+}
+
+function hideError(id) {
+  $(id).textContent = "";
+  $(id).classList.add("hidden");
+}
+
+function openModal(id) { $(id).classList.add("open"); }
+function closeModal(id) { $(id).classList.remove("open"); }
+
+async function init() {
+  $("year").textContent = new Date().getFullYear();
+  $("productList").innerHTML = '<div class="empty">Загружаем каталог...</div>';
+
+  await loadCatalog();
+
+  const { data } = await db.auth.getSession();
+  if (data.session) {
+    await checkAdmin(data.session.user);
+  }
+
+  db.auth.onAuthStateChange(async (_event, session) => {
+    if (session && !isAdmin) {
+      await checkAdmin(session.user);
+    }
+    if (!session && isAdmin) {
+      isAdmin = false;
+      currentUser = null;
+      showPublicSite();
+    }
+  });
+}
+
+async function loadCatalog() {
+  try {
+    const [catResult, productResult, imageResult] = await Promise.all([
+      db.from("categories").select("id,name").order("name"),
+      db.from("products").select("id,name,category_id,price,description,is_active,created_at").eq("is_active", true).order("created_at", {ascending:false}),
+      db.from("product_images").select("id,product_id,image_url,sort_order").order("sort_order")
+    ]);
+
+    if (catResult.error) throw catResult.error;
+    if (productResult.error) throw productResult.error;
+    if (imageResult.error) throw imageResult.error;
+
+    categories = catResult.data || [];
+    products = productResult.data || [];
+    images = imageResult.data || [];
+
+    renderCategories();
+    renderProducts();
+    fillInquiryProducts();
+
+    $("catalogNotice").classList.add("hidden");
+  } catch (error) {
+    console.error(error);
+    $("productList").innerHTML = '<div class="empty">Не удалось загрузить каталог.</div>';
+    showError("catalogNotice",
+      "Ошибка подключения к базе данных: " + (error.message || "проверьте права доступа и настройки Supabase.")
+    );
+  }
+}
+
+function renderCategories() {
+  const el = $("categoryList");
+el.innerHTML = "";
+  categories.forEach(category => {
+    const button = document.createElement("button");
+    button.className = "category-btn" + (selectedCategory === category.id ? " active" : "");
+    button.textContent = category.name;
+    button.onclick = () => selectCategory(category.id, button);
+    el.appendChild(button);
+  });
+}
+
+function selectCategory(id, button) {
+  selectedCategory = id;
+  document.querySelectorAll(".category-btn").forEach(b => b.classList.remove("active"));
+  button.classList.add("active");
+  renderProducts();
+}
+
+function getProductImage(productId) {
+  const found = images.find(i => i.product_id === productId && i.image_url);
+  return found ? found.image_url : "";
+}
+
+function renderProducts() {
+  const search = $("searchInput").value.trim().toLowerCase();
+
+  const filtered = products.filter(p => {
+    const matchesCategory = selectedCategory === "all" || p.category_id === selectedCategory;
+    const category = categories.find(c => c.id === p.category_id);
+    const matchesSearch = (p.name + " " + (p.description || "") + " " + (category?.name || "")).toLowerCase().includes(search);
+    return matchesCategory && matchesSearch;
+  });
+
+  const list = $("productList");
+  if (!filtered.length) {
+    list.innerHTML = '<div class="empty" style="grid-column:1/-1">Пока здесь нет товаров. Загляните позже.</div>';
+    return;
+  }
+
+  list.innerHTML = filtered.map(p => {
+    const category = categories.find(c => c.id === p.category_id);
+    const imageUrl = getProductImage(p.id);
+    return `
+      <article class="product">
+        ${imageUrl
+          ? `<img src="${escapeHTML(imageUrl)}" alt="${escapeHTML(p.name)}" loading="lazy">`
+          : `<div style="height:245px;background:#eee9e1;display:grid;place-items:center;color:#928b80">Фото скоро появится</div>`}
+        <div class="product-body">
+          <div class="product-category">${escapeHTML(category?.name || "Мебель")}</div>
+          <h3>${escapeHTML(p.name)}</h3>
+          <p>${escapeHTML(p.description || "Подробности уточняйте у продавца.")}</p>
+          <div class="price">${money(p.price)}</div>
+          <div class="product-actions">
+            <button class="btn full" onclick="openInquiry('${p.id}')">Оставить заявку</button>
+          </div>
+        </div>
+      </article>`;
+  }).join("");
+}
+
+function fillInquiryProducts() {
+  $("inquiryProduct").innerHTML = '<option value="">Общий вопрос</option>' +
+    products.map(p => `<option value="${p.id}">${escapeHTML(p.name)}</option>`).join("");
+}
+
+function openInquiry(productId = "") {
+  $("inquiryProduct").value = productId || "";
+  hideError("inquiryError");
+  openModal("inquiryModal");
+}
+
+async function submitInquiry(event) {
+  event.preventDefault();
+  hideError("inquiryError");
+
+  const button = $("inquirySubmit");
+  button.disabled = true;
+  button.textContent = "Отправка...";
+
+  try {
+    const name = $("customerName").value.trim();
+    const phone = $("customerPhone").value.trim();
+    const productId = $("inquiryProduct").value || null;
+    const message = $("inquiryMessage").value.trim();
+
+    const { error } = await db.from("inquiries").insert({
+      customer_name: name,
+      customer_phone: phone,
+      product_id: productId,
+      message: message || null
+    });
+
+    if (error) throw error;
+
+    alert("Заявка отправлена. Спасибо!");
+    $("customerName").value = "";
+    $("customerPhone").value = "";
+    $("inquiryMessage").value = "";
+    $("inquiryProduct").value = "";
+    closeModal("inquiryModal");
+  } catch (error) {
+    console.error(error);
+    showError("inquiryError", "Не удалось отправить заявку: " + error.message);
+  } finally {
+    button.disabled = false;
+    button.textContent = "Отправить заявку";
+  }
+}
+
+function openLogin() {
+  hideError("loginError");
+  openModal("loginModal");
+}
+
+async function login(event) {
+  event.preventDefault();
+  hideError("loginError");
+
+  const email = $("loginEmail").value.trim();
+  const password = $("loginPassword").value;
+
+  const { data, error } = await db.auth.signInWithPassword({email,password});
+
+  if (error) {
+    showError("loginError", "Ошибка входа: " + error.message);
+    return;
+  }
+
+  const success = await checkAdmin(data.user);
+  if (!success) {
+    await db.auth.signOut();
+    showError("loginError", "У этого пользователя нет прав администратора. Проверьте таблицу admins.");
+    return;
+  }
+
+  closeModal("loginModal");
+}
+
+async function checkAdmin(user) {
+  if (!user) return false;
+
+  const { data, error } = await db
+    .from("admins")
+    .select("user_id")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (error || !data) {
+    console.error("Admin check:", error);
+    isAdmin = false;
+    currentUser = null;
+    return false;
+  }
+
+  isAdmin = true;
+  currentUser = user;
+  showAdminSite();
+  await loadAdminData();
+  return true;
+}
+
+function showAdminSite() {
+  $("publicSite").classList.add("hidden");
+  $("adminSite").classList.remove("hidden");
+  window.scrollTo(0,0);
+}
+
+function showPublicSite() {
+  $("adminSite").classList.add("hidden");
+  $("publicSite").classList.remove("hidden");
+}
+
+async function logout() {
+  await db.auth.signOut();
+  isAdmin = false;
+  currentUser = null;
+  showPublicSite();
+}
+
+function showAdminTab(tab, button) {
+  ["products","categories","inquiries"].forEach(name => {
+    $("admin" + name[0].toUpperCase() + name.slice(1)).classList.toggle("hidden", name !== tab);
+  });
+  document.querySelectorAll(".admin-tabs button").forEach(b => b.classList.remove("active"));
+  button.classList.add("active");
+}
+
+async function loadAdminData() {
+  await loadCatalog();
+  await Promise.all([loadAdminProducts(),loadAdminCategories(),loadInquiries()]);
+}
+
+async function loadAdminProducts() {
+  const { data, error } = await db.from("products")
+    .select("id,name,category_id,price,description,is_active,created_at")
+    .order("created_at",{ascending:false});
+
+  if (error) {
+    $("adminProductList").textContent = "Ошибка: " + error.message;
+    return;
+  }
+
+  const list = $("adminProductList");
+  if (!data.length) {
+    list.innerHTML = '<div class="notice">Товаров пока нет. Добавьте первый товар.</div>';
+    return;
+  }
+
+  list.innerHTML = data.map(p => {
+    const category = categories.find(c => c.id === p.category_id);
+    return `<div class="admin-item">
+      <div class="admin-item-info">
+        <strong>${escapeHTML(p.name)}</strong>
+        <small>${escapeHTML(category?.name || "Без категории")} · ${money(p.price)} · ${p.is_active ? "Опубликован" : "Скрыт"}</small>
+      </div>
+      <div class="admin-actions">
+        <button class="btn btn-light" onclick="editProduct('${p.id}')">Изменить</button>
+        <button class="btn btn-outline" onclick="toggleProduct('${p.id}',${!p.is_active})">${p.is_active ? "Скрыть" : "Показать"}</button>
+        <button class="btn btn-outline" onclick="deleteProduct('${p.id}')">Удалить</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+async function loadAdminCategories() {
+  const { data, error } = await db.from("categories").select("id,name").order("name");
+  if (error) {
+    $("adminCategoryList").textContent = "Ошибка: " + error.message;
+    return;
+  }
+  categories = data || [];
+  renderCategories();
+
+  $("adminCategoryList").innerHTML = categories.map(c => `
+    <div class="admin-item">
+      <div class="admin-item-info"><strong>${escapeHTML(c.name)}</strong></div>
+      <div class="admin-actions">
+        <button class="btn btn-outline" onclick="deleteCategory('${c.id}')">Удалить</button>
+      </div>
+    </div>`).join("") || '<div class="notice">Категорий пока нет.</div>';
+}
+
+async function addCategory(event) {
+  event.preventDefault();
+  const name = $("newCategoryName").value.trim();
+  if (!name) return;
+
+  const { error } = await db.from("categories").insert({name});
+  if (error) {
+    alert("Не удалось добавить категорию: " + error.message);
+    return;
+  }
+
+  $("newCategoryName").value = "";
+  await loadAdminCategories();
+  await loadCatalog();
+}
+
+async function deleteCategory(id) {
+  if (!confirm("Удалить категорию? Сначала убедитесь, что в ней нет товаров.")) return;
+
+  const { error } = await db.from("categories").delete().eq("id",id);
+  if (error) {
+    alert("Не удалось удалить категорию. Возможно, в ней ещё есть товары. " + error.message);
+    return;
+  }
+
+  await loadAdminCategories();
+  await loadCatalog();
+}
+
+function openProductEditor(product = null) {
+  hideError("productError");
+  $("productEditorTitle").textContent = product ? "Изменить товар" : "Новый товар";
+  $("editProductId").value = product?.id || "";
+  $("productName").value = product?.name || "";
+  $("productPrice").value = product?.price ?? "";
+  $("productDescription").value = product?.description || "";
+  $("productPhoto").value = "";
+
+  $("productCategory").innerHTML = categories.map(c =>
+    `<option value="${c.id}">${escapeHTML(c.name)}</option>`
+  ).join("");
+
+  if (product) $("productCategory").value = product.category_id || "";
+  openModal("productModal");
+}
+
+async function editProduct(id) {
+  const { data, error } = await db.from("products")
+    .select("id,name,category_id,price,description,is_active")
+    .eq("id",id).single();
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+  openProductEditor(data);
+}
+
+async function saveProduct(event) {
+  event.preventDefault();
+  hideError("productError");
+
+  const button = $("productSaveButton");
+  button.disabled = true;
+  button.textContent = "Сохранение...";
+
+  try {
+    const id = $("editProductId").value;
+    const payload = {
+      name: $("productName").value.trim(),
+      category_id: $("productCategory").value,
+      price: Number($("productPrice").value),
+      description: $("productDescription").value.trim(),
+      is_active: true
+    };
+
+    if (!payload.name || !payload.category_id || !Number.isFinite(payload.price) || payload.price < 0) {
+      throw new Error("Проверьте название, категорию и цену.");
+    }
+
+    let productId = id;
+
+    if (id) {
+      const { error } = await db.from("products").update(payload).eq("id",id);
+      if (error) throw error;
+    } else {
+      const { data, error } = await db.from("products").insert(payload).select("id").single();
+      if (error) throw error;
+      productId = data.id;
+    }
+
+    const file = $("productPhoto").files[0];
+    if (file) {
+      if (!file.type.startsWith("image/")) throw new Error("Выберите файл изображения.");
+      if (file.size > 8 * 1024 * 1024) throw new Error("Размер фотографии не должен превышать 8 МБ.");
+
+      const extension = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g,"");
+      const path = productId + "/" + crypto.randomUUID() + "." + extension;
+
+      const { error: uploadError } = await db.storage.from(STORAGE_BUCKET)
+        .upload(path,file,{contentType:file.type,upsert:false});
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = db.storage.from(STORAGE_BUCKET).getPublicUrl(path);
+
+      const { error: imageError } = await db.from("product_images").insert({
+        product_id: productId,
+        image_url: urlData.publicUrl,
+        sort_order: 0
+      });
+
+      if (imageError) throw imageError;
+    }
+
+    closeModal("productModal");
+    await loadAdminData();
+    alert("Товар сохранён.");
+  } catch (error) {
+    console.error(error);
+    showError("productError","Ошибка: " + error.message);
+  } finally {
+    button.disabled = false;
+    button.textContent = "Сохранить товар";
+  }
+}
+
+async function toggleProduct(id, active) {
+  const { error } = await db.from("products").update({is_active:active}).eq("id",id);
+  if (error) {
+    alert("Ошибка: " + error.message);
+    return;
+  }
+  await loadAdminData();
+}
+
+async function deleteProduct(id) {
+  if (!confirm("Удалить товар?")) return;
+
+  try {
+    const { data: productImages, error: readError } = await db.from("product_images")
+      .select("id,image_url").eq("product_id",id);
+    if (readError) throw readError;
+
+    // Удаляем записи изображений из базы.
+    const { error: imageDeleteError } = await db.from("product_images")
+      .delete().eq("product_id",id);
+    if (imageDeleteError) throw imageDeleteError;
+
+    // Удаляем сами файлы из хранилища, если они принадлежат нашему bucket.
+    const paths = (productImages || []).map(img => {
+      try {
+        const url = new URL(img.image_url);
+        const marker = "/storage/v1/object/public/" + STORAGE_BUCKET + "/";
+        const index = url.pathname.indexOf(marker);
+        return index >= 0 ? decodeURIComponent(url.pathname.slice(index + marker.length)) : null;
+      } catch { return null; }
+    }).filter(Boolean);
+
+    if (paths.length) {
+      const { error: storageError } = await db.storage.from(STORAGE_BUCKET).remove(paths);
+      if (storageError) console.warn("Storage cleanup:",storageError.message);
+    }
+
+    const { error } = await db.from("products").delete().eq("id",id);
+    if (error) throw error;
+
+    await loadAdminData();
+  } catch (error) {
+    alert("Не удалось удалить товар: " + error.message);
+  }
+}
+
+async function loadInquiries() {
+  const list = $("adminInquiryList");
+  list.innerHTML = "Загружаем заявки...";
+
+  const { data, error } = await db.from("inquiries")
+    .select("id,created_at,customer_name,customer_phone,product_id,message,status")
+    .order("created_at",{ascending:false});
+
+  if (error) {
+    list.textContent = "Ошибка загрузки заявок: " + error.message;
+    return;
+  }
+
+  if (!data.length) {
+    list.innerHTML = '<div class="notice">Новых заявок пока нет.</div>';
+    return;
+  }
+
+  list.innerHTML = data.map(item => {
+    const product = products.find(p => p.id === item.product_id);
+    const date = item.created_at ? new Date(item.created_at).toLocaleString("ru-RU") : "";
+    return `<div class="admin-item">
+      <div class="admin-item-info">
+        <strong>${escapeHTML(item.customer_name)} · ${escapeHTML(item.customer_phone)}</strong>
+        <small>${escapeHTML(product?.name || "Общий вопрос")} · ${escapeHTML(date)}</small>
+        <p>${escapeHTML(item.message || "Без комментария")}</p>
+        <span class="status">Статус: ${escapeHTML(item.status)}</span>
+      </div>
+      <div class="admin-actions">
+        <button class="btn btn-light" onclick="updateInquiry('${item.id}','in_progress')">В работе</button>
+        <button class="btn btn-light" onclick="updateInquiry('${item.id}','completed')">Завершена</button>
+        <button class="btn btn-outline" onclick="deleteInquiry('${item.id}')">Удалить</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+async function updateInquiry(id,status) {
+  const { error } = await db.from("inquiries").update({status}).eq("id",id);
+  if (error) {
+    alert("Не удалось изменить статус: " + error.message);
+    return;
+  }
+  await loadInquiries();
+}
+
+async function deleteInquiry(id) {
+  if (!confirm("Удалить эту заявку?")) return;
+  const { error } = await db.from("inquiries").delete().eq("id",id);
+  if (error) {
+    alert("Не удалось удалить заявку: " + error.message);
+    return;
+  }
+  await loadInquiries();
+}
+
+init();
+</script>
+<section id="contacts" class="contacts">
+  <h2>Контакты</h2>
+
+  <p>
+    Телефон:
+    <a href="tel:+79831265118">+7 (983) 126-51-18</a>
+  </p>
+
+  <p>
+    ВКонтакте:
+    <a href="https://vk.ru/id62189523" target="_blank" rel="noopener noreferrer">
+      Перейти на страницу
+    </a>
+  </p>
+</section>
+</section>
+</body>
+</html>
